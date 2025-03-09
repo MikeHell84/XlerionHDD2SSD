@@ -57,7 +57,7 @@ To compile the PowerShell script into an executable (.exe) file, the `ps2exe` mo
     ```
 2. Run the following command to compile the script:
     ````sh
-    Invoke-ps2exe -inputFile x:\Data2Cache\DevFiles\Powershell\GestionArchivos3D.ps1 -outputFile x:\Data2Cache\DevFiles\Powershell\GestionArchivos3D.exe -iconFile x:\Data2Cache\DevFiles\Powershell\icon_16x16.ico -verbose
+    Invoke-ps2exe -inputFile <your_path_>\XlerionHHD2SSDCache3D.ps1 -outputFile <you_path>\XlerionHHD2SSDCache.exe -iconFile x:\Data2Cache\DevFiles\Powershell\icon_16x16.ico -verbose
     ```
 
 ## Usage
