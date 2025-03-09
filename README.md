@@ -1,63 +1,73 @@
-# XlerionHDD2SSD
+## File Management 3D
+
+## Description
 File Management 3D is an application that provides a graphical interface for managing files and folders between an HDD and an SSD. It allows you to add folders and files, copy them to the SSD, copy them back to the HDD and select the destination folder on the SSD.
 
-    # File Management 3D
+## Features
+- Add Folder**: Add a folder to the source path list.
+- Add File**: Add files to the source path list.
+- Select SSD**: Selects the destination folder on the SSD.
+- Delete SSD**: Deletes the selected SSD folder and restores the default folder.
+- Copy to SSD**: Copies the selected files and folders to the SSD.
+- Return to HDD**: Returns the files and folders from the SSD to the original locations.
+- Open Location**: Opens the destination folder in File Explorer.
+- Save Configuration**: Saves the current configuration to a JSON file.
+- Open Configuration**: Loads a configuration from a JSON file.
+- Clear**: Cleans the list of paths and added files.
+- Exit**: Closes the application.
 
-## Descripción
-File Management 3D es una aplicación que proporciona una interfaz gráfica para gestionar archivos y carpetas entre un HDD y un SSD. Permite agregar carpetas y archivos, copiarlos al SSD, devolverlos al HDD y seleccionar la carpeta de destino en el SSD.
+## Standards and Guidelines
+- ISO 9001:2015** - Quality Management Systems.
+- ISO/IEC 27001:2013** - Information Security Management Systems.
+- ISO 31000:2018** - Risk Management.
+- ISO 14001:2015** - Environmental Management Systems.
+- ISO 45001:2018** - Occupational Health and Safety Management Systems.
 
-## Características
-- **Agregar Carpeta**: Añade una carpeta a la lista de rutas de origen.
-- **Agregar Archivo**: Añade archivos a la lista de rutas de origen.
-- **Seleccionar SSD**: Selecciona la carpeta de destino en el SSD.
-- **Eliminar SSD**: Elimina la carpeta SSD seleccionada y restablece la carpeta predeterminada.
-- **Copiar al SSD**: Copia los archivos y carpetas seleccionados al SSD.
-- **Devolver al HDD**: Devuelve los archivos y carpetas del SSD a las ubicaciones originales.
-- **Abrir Ubicación**: Abre la carpeta de destino en el Explorador de Archivos.
-- **Guardar Configuración**: Guarda la configuración actual en un archivo JSON.
-- **Abrir Configuración**: Carga una configuración desde un archivo JSON.
-- **Limpiar**: Limpia la lista de rutas y archivos añadidos.
-- **Salir**: Cierra la aplicación.
-
-## Estándares y Directrices
-- **ISO 9001:2015** - Sistemas de Gestión de la Calidad.
-- **ISO/IEC 27001:2013** - Sistemas de Gestión de la Seguridad de la Información.
-- **ISO 31000:2018** - Gestión del Riesgo.
-- **ISO 14001:2015** - Sistemas de Gestión Ambiental.
-- **ISO 45001:2018** - Sistemas de Gestión de la Seguridad y Salud en el Trabajo.
-
-## Desarrolladores
-- **Miguel Rodriguez**: redxlerion@gmail.com
+## Developers.
+- Miguel Rodriguez**: [redxlerion@gmail.com].
 - **Xlerion**: [https://www.xlerion.com](https://www.xlerion.com)
 
-## Potencial del Programa
-Este programa tiene el potencial de agilizar significativamente la gestión de archivos y carpetas entre HDDs y SSDs, mejorando la eficiencia y reduciendo el esfuerzo manual. Puede ser particularmente útil para usuarios que necesitan transferir grandes cantidades de datos entre diferentes dispositivos de almacenamiento con frecuencia.
+## Program Potential
+This program has the potential to significantly streamline file and folder management between HDDs and SSDs, improving efficiency and reducing manual effort. It can be particularly useful for users who need to transfer large amounts of data between different storage devices frequently.
 
-## Requisitos del Sistema
-- **Sistema Operativo**: Windows 7 o superior
-- **PowerShell**: Versión 5.1 o superior
-- **.NET Framework**: Versión 4.5 o superior
+## System Requirements
+- Operating System**: Windows 7 or higher
+- **PowerShell**: Version 5.1 or higher
+- .NET Framework**: Version 4.5 or higher
 
-## Instalación
-1. Clona el repositorio:
+## Installation
+1. Clone the repository:
     ```sh
-    git clone https://github.com/tu-usuario/file-management-3d.git
+    git clone https://github.com/MikeHell84/XlerionHDD2SSD.git
     ```
-2. Navega al directorio del proyecto:
-    ```sh
-    cd file-management-3d
+2. Navigate to the project directory:
+    ````sh
+    cd XlerionHDD2SSD
     ```
-3. Ejecuta el script de PowerShell:
-    ```sh
-    .\GestionArchivos3D.ps1
+3. Run the PowerShell script:
+    ````sh
+    .\FileManagement3D.ps1
     ```
 
-## Uso
-1. Ejecuta la aplicación.
-2. Utiliza los botones y menús para gestionar tus archivos y carpetas entre el HDD y el SSD.
+## Compiling
+To compile the PowerShell script into an executable (.exe) file, the `ps2exe` module was used. Here are the steps for compilation:
+1. Install the `ps2exe` module if you don't have it:
+    ````sh
+    Install-Module -Name ps2exe -Scope CurrentUser
+    ```
+2. Run the following command to compile the script:
+    ````sh
+    Invoke-ps2exe -inputFile x:\Data2Cache\DevFiles\Powershell\GestionArchivos3D.ps1 -outputFile x:\Data2Cache\DevFiles\Powershell\GestionArchivos3D.exe -iconFile x:\Data2Cache\DevFiles\Powershell\icon_16x16.ico -verbose
+    ```
 
-## Contribuciones
-Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request para discutir cualquier cambio que te gustaría realizar.
+## Usage
+1. Run the application.
+2. Use the buttons and menus to manage your files and folders between the HDD and SSD.
 
-## Licencia
-Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+## Contributions
+Contributions are welcome. Please open an issue or send a pull request to discuss any changes you would like to make.
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+Translated with DeepL.com (free version)
