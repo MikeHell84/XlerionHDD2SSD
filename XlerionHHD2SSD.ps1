@@ -5,20 +5,34 @@
 # Load the Windows Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
 
-$scriptPath = "Powershell\GestionArchivos3D.ps1"
-$outputExePath = "Powershell\XlerionHDD2SSD\Xlerion - HDD 2 SSD Cache.exe"
-$iconPath = "Powershell\XlerionHDD2SSD\icons\icon_64x64.ico"
+# Get the current script directory
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Check if the icon file exists
+$scriptPath = Join-Path $scriptDir "XlerionHHD2SSD.ps1"
+$outputExePath = Join-Path $scriptDir "XlerionHHD2SSDCache.exe"
+$iconPath = Join-Path $scriptDir "icons\icon_32x32.ico"
+
+# Check if the icon file exists and is valid
 if (Test-Path $iconPath) {
-    Write-Host "The icon file exists at the specified path."
+    try {
+        [System.Drawing.Icon]::ExtractAssociatedIcon($iconPath) | Out-Null
+        Write-Host "The icon file exists and is valid at the specified path."
+    } catch {
+        Write-Host "Error reading icon file: $iconPath. Details: $_"
+        $iconPath = $null  # Set to null if the icon file is not valid
+    }
 } else {
     Write-Host "The icon file does not exist at the specified path."
+    $iconPath = $null  # Set to null if the icon file does not exist
 }
 
 # Compile the PowerShell script into an .exe file with an icon
 try {
-    Invoke-ps2exe -inputFile $scriptPath -outputFile $outputExePath -iconFile $iconPath -verbose
+    if ($iconPath -and (Test-Path $iconPath)) {
+        Invoke-ps2exe -inputFile $scriptPath -outputFile $outputExePath -iconFile $iconPath -verbose
+    } else {
+        Invoke-ps2exe -inputFile $scriptPath -outputFile $outputExePath -verbose
+    }
 } catch {
     Write-Host "Error during compilation: $_"
 }
@@ -34,8 +48,15 @@ $form.AutoSizeMode = "GrowAndShrink"
 $form.BackColor = [System.Drawing.Color]::Black  # Set background color to black
 $form.ForeColor = [System.Drawing.Color]::White  # Set text color to white
 
+# Ensure the icon is set for the form
+if ($iconPath -and (Test-Path $iconPath)) {
+    $form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($iconPath)
+} else {
+    Write-Host "The icon file does not exist at the specified path or was not provided."
+}
+
 # Load the background image
-$backgroundImagePath = "Powershell\XlerionHDD2SSD\background.png"
+$backgroundImagePath = Join-Path $scriptDir "background.png"
 if (Test-Path $backgroundImagePath) {
     $backgroundImage = [System.Drawing.Image]::FromFile($backgroundImagePath)
     $form.BackgroundImage = $backgroundImage
@@ -141,7 +162,6 @@ Developers:
 - Miguel Rodriguez: redxlerion@gmail.com
 - Xlerion: https://www.xlerion.com
 
-
 Potential of the Program:
 This program has the potential to significantly streamline the management of files and folders between HDDs and SSDs, improving efficiency and reducing manual effort. It can be particularly useful for users who frequently need to transfer large amounts of data between different storage devices.
 "@
@@ -173,6 +193,7 @@ $openConfigMenuItem.Add_Click({
         $config = Get-Content -Path $openFileDialog.FileName | ConvertFrom-Json
         $global:rutasOrigen = $config.RutasOrigen
         $global:destino = $config.Destino
+        $textBox.AppendText("Destination path set to: $global:destino`r`n")
         $textBox.Clear()
         foreach ($ruta in $global:rutasOrigen) {
             $textBox.AppendText("Loaded path: $ruta`r`n")
@@ -191,21 +212,24 @@ function DevolverArchivoOCarpeta {
             Write-Host "Returning files to: $ruta from $global:destino"  # Debug message
             # Move the files to the destination
             $items = Get-ChildItem -Path $global:destino
-            $totalItems = $items.Count
-            $progressBar.Value = 0
-            $startTime = Get-Date
-            foreach ($index in 0..($totalItems - 1)) {
-                $item = $items[$index]
-                Copy-Item -Path $item.FullName -Destination $ruta -Force
-                Remove-Item -Path $item.FullName -Force
-                $textBox.AppendText("File/folder moved: $item`r`n")
-                $progressBar.Value = [math]::Round((($index + 1) / $totalItems) * 100)
-                $elapsedTime = (Get-Date) - $startTime
-                $remainingTime = $elapsedTime.TotalSeconds / ($index + 1) * ($totalItems - $index - 1)
-                $form.Text = "File Management 3D - Remaining time: $([math]::Round($remainingTime)) seconds"
+            if ($items) {
+                $totalItems = $items.Count
+                $progressBar.Value = 0
+                $startTime = Get-Date
+                foreach ($index in 0..($totalItems - 1)) {
+                    $item = $items[$index]
+                    Copy-Item -Path $item.FullName -Destination $ruta -Force
+                    Remove-Item -Path $item.FullName -Force
+                    $textBox.AppendText("File/folder moved: $item`r`n")
+                    $progressBar.Value = [math]::Round((($index + 1) / $totalItems) * 100)
+                    $elapsedTime = (Get-Date) - $startTime
+                    $remainingTime = $elapsedTime.TotalSeconds / ($index + 1) * ($totalItems - $index - 1)
+                    $form.Text = "File Management - Remaining time: $([math]::Round($remainingTime)) seconds"
+                }
+                $textBox.AppendText("All files were removed from the SSD after being returned.`r`n")
+            } else {
+                $textBox.AppendText("No items found in the destination path: $global:destino`r`n")
             }
-
-            $textBox.AppendText("All files were removed from the SSD after being returned.`r`n")
         } catch {
             $textBox.AppendText("Error returning to: $ruta. Details: $_`r`n")
             Write-Host "Error returning to: $ruta. Details: $_"  # Debug message
@@ -218,28 +242,25 @@ function DevolverArchivoOCarpeta {
 }
 
 # Load button background image
-$buttonBackgroundImagePath = "x:\Data2Cache\DevFiles\Powershell\button_background.png"
-$buttonBackgroundImage = $null
-if (Test-Path $buttonBackgroundImagePath) {
-    $buttonBackgroundImage = [System.Drawing.Image]::FromFile($buttonBackgroundImagePath)
-} else {
+$buttonBackgroundImagePath = Join-Path $scriptDir "button_background.png"
+if (-not (Test-Path $buttonBackgroundImagePath)) {
     Write-Host "The button background image does not exist at the specified path."
 }
 
 # Load button background images
 $buttonImages = @{
-    "Add Folder" = "Powershell\XlerionHDD2SSD\icons\add_folder.png"
-    "Add File" = "Powershell\XlerionHDD2SSD\icons\add_file.png"
-    "Copy to SSD" = "Powershell\XlerionHDD2SSD\icons\copy_to_ssd.png"
-    "Return to HDD" = "Powershell\XlerionHDD2SSD\icons\return_to_hdd.png"
-    "Select SSD" = "Powershell\XlerionHDD2SSD\icons\select_ssd.png"
-    "Remove SSD" = "Powershell\XlerionHDD2SSD\icons\remove_ssd.png"
-    "Open Location" = "Powershell\XlerionHDD2SSD\icons\open_location.png"
-    "Exit" = "Powershell\XlerionHDD2SSD\icons\exit.png"
+    "Add Folder" = Join-Path $scriptDir "icons\add_folder.png"
+    "Add File" = Join-Path $scriptDir "icons\add_file.png"
+    "Copy to SSD" = Join-Path $scriptDir "icons\copy_to_ssd.png"
+    "Return to HDD" = Join-Path $scriptDir "icons\return_to_hdd.png"
+    "Select SSD" = Join-Path $scriptDir "icons\select_ssd.png"
+    "Remove SSD" = Join-Path $scriptDir "icons\remove_ssd.png"
+    "Open Location" = Join-Path $scriptDir "icons\open_location.png"
+    "Exit" = Join-Path $scriptDir "icons\exit.png"
 }
 
 # Create the buttons with only the image and adjust size to fit the image
-function CreateButton($text) {
+function CreateButton($text, $buttonImages) {
     $button = New-Object System.Windows.Forms.Button
     $button.Text = $text
     $button.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter  # Center text horizontally and vertically
@@ -248,37 +269,43 @@ function CreateButton($text) {
     $button.BackColor = [System.Drawing.Color]::Transparent
     $button.ForeColor = [System.Drawing.Color]::Cyan  # Set text color to bright blue
     $button.Font = New-Object System.Drawing.Font($button.Font, [System.Drawing.FontStyle]::Bold)  # Set text to bold
-    if ($buttonImages[$text] -ne $null -and (Test-Path $buttonImages[$text])) {
+    if ($null -ne $buttonImages[$text] -and (Test-Path $buttonImages[$text])) {
         $image = [System.Drawing.Image]::FromFile($buttonImages[$text])
         $button.BackgroundImage = $image
         $button.BackgroundImageLayout = "Stretch"
         $button.Size = New-Object System.Drawing.Size($image.Width, $image.Height)  # Adjust size to fit the image
+    } else {
+        Write-Host "The image for the button '$text' does not exist at the specified path."
     }
     return $button
 }
 
-$btnAddFolder = CreateButton "Add Folder"
+# Initialize global variables
+$global:rutasOrigen = @()
+$global:destino = "C:\CarpetaSSD"
+
+$btnAddFolder = CreateButton "Add Folder" $buttonImages
 $buttonPanel.Controls.Add($btnAddFolder)
 
-$btnAddFile = CreateButton "Add File"
+$btnAddFile = CreateButton "Add File" $buttonImages
 $buttonPanel.Controls.Add($btnAddFile)
 
-$btnCopiar = CreateButton "Copy to SSD"
+$btnCopiar = CreateButton "Copy to SSD" $buttonImages
 $buttonPanel.Controls.Add($btnCopiar)
 
-$btnDevolver = CreateButton "Return to HDD"
+$btnDevolver = CreateButton "Return to HDD" $buttonImages
 $buttonPanel.Controls.Add($btnDevolver)
 
-$btnElegirSSD = CreateButton "Select SSD"
+$btnElegirSSD = CreateButton "Select SSD" $buttonImages
 $buttonPanel.Controls.Add($btnElegirSSD)
 
-$btnQuitarSSD = CreateButton "Remove SSD"
+$btnQuitarSSD = CreateButton "Remove SSD" $buttonImages
 $buttonPanel.Controls.Add($btnQuitarSSD)
 
-$btnAbrirUbicacion = CreateButton "Open Location"
+$btnAbrirUbicacion = CreateButton "Open Location" $buttonImages
 $buttonPanel.Controls.Add($btnAbrirUbicacion)
 
-$btnSalir = CreateButton "Exit"
+$btnSalir = CreateButton "Exit" $buttonImages
 $buttonPanel.Controls.Add($btnSalir)
 
 # Action to add folder
@@ -304,9 +331,7 @@ $btnAddFile.Add_Click({
 
 # Action to copy files/folders to the SSD
 $btnCopiar.Add_Click({
-    if ($global:rutasOrigen.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("No paths or files configured. Add paths/files first.", "Warning")
-    } else {
+    if ($global:rutasOrigen -and $global:rutasOrigen.Count -gt 0) {
         $totalItems = $global:rutasOrigen.Count
         $progressBar.Value = 0
         $startTime = Get-Date
@@ -324,7 +349,7 @@ $btnCopiar.Add_Click({
                     $progressBar.Value = [math]::Round((($index + 1) / $totalItems) * 100)
                     $elapsedTime = (Get-Date) - $startTime
                     $remainingTime = $elapsedTime.TotalSeconds / ($index + 1) * ($totalItems - $index - 1)
-                    $form.Text = "File Management 3D - Remaining time: $([math]::Round($remainingTime)) seconds"
+                    $form.Text = "Xlerion - File Management - Remaining time: $([math]::Round($remainingTime)) seconds"
                 } catch {
                     $textBox.AppendText("Error copying from: $ruta. Details: $_`r`n")
                     Write-Host "Error copying from: $ruta. Details: $_"
@@ -335,7 +360,9 @@ $btnCopiar.Add_Click({
             }
         }
         [System.Windows.Forms.MessageBox]::Show("Files and folders successfully copied to SSD.", "Success")
-        $form.Text = "File Management 3D"
+        $form.Text = "File Management"
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("No paths or files configured. Add paths/files first.", "Warning")
     }
 })
 
