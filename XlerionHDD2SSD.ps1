@@ -1,16 +1,27 @@
-# File Management 3D
-# This script provides a graphical interface to manage files and folders between an HDD and an SSD.
-# It allows adding folders and files, copying them to the SSD, returning them to the HDD, and selecting the destination SSD.
+<#
+File Management 3D
+This script provides a graphical interface to manage files and folders between an HDD and an SSD.
+It allows adding folders and files, copying them to the SSD, returning them to the HDD, and selecting the destination SSD.
+#>
 
 # Load the Windows Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
 
 # Get the current script directory
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$scriptDir = "X:\Data2Cache\DevFiles\XlerionHDD2SSD"
 
-$scriptPath = Join-Path $scriptDir "XlerionHHD2SSD.ps1"
-$outputExePath = Join-Path $scriptDir "XlerionHHD2SSDCache.exe"
-$iconPath = Join-Path $scriptDir "icons\icon_32x32.ico"
+# Declarar variables globales
+$global:rutasOrigen = @() # Inicia como lista vacía
+
+if (-not (Test-Path $ruta)) {
+    Write-Host "La ruta no es válida: $ruta" -ForegroundColor Red
+}
+
+
+
+$scriptPath = Join-Path $scriptDir "XlerionHDD2SSD.ps1"
+$outputExePath = Join-Path $scriptDir "XlerionHDD2SSDCache.exe"
+$iconPath = Join-Path $scriptDir "icons\icon_16x16.ico"
 
 # Check if the icon file exists and is valid
 if (Test-Path $iconPath) {
@@ -242,12 +253,16 @@ function DevolverArchivoOCarpeta {
 }
 
 # Load button background image
-$buttonBackgroundImagePath = Join-Path $scriptDir "button_background.png"
+$buttonBackgroundImagePath = Join-Path $scriptDir "\button_background.png"
 if (-not (Test-Path $buttonBackgroundImagePath)) {
     Write-Host "The button background image does not exist at the specified path."
 }
 
 # Load button background images
+
+$btnAgregarCarpeta.BackgroundImage = [System.Drawing.Image]::FromFile($buttonImages["Add Folder"])
+$btnAgregarCarpeta.BackgroundImageLayout = "Stretch"
+
 $buttonImages = @{
     "Add Folder" = Join-Path $scriptDir "icons\add_folder.png"
     "Add File" = Join-Path $scriptDir "icons\add_file.png"
@@ -257,6 +272,13 @@ $buttonImages = @{
     "Remove SSD" = Join-Path $scriptDir "icons\remove_ssd.png"
     "Open Location" = Join-Path $scriptDir "icons\open_location.png"
     "Exit" = Join-Path $scriptDir "icons\exit.png"
+
+}
+
+foreach ($key in $buttonImages.Keys) {
+    if (-not (Test-Path $buttonImages[$key])) {
+        Write-Host "La imagen para '$key' no se encontró en la ruta: $($buttonImages[$key])" -ForegroundColor Red
+    }
 }
 
 # Create the buttons with only the image and adjust size to fit the image
